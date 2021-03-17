@@ -10,3 +10,4 @@ run
 .vscode
 *.sif
 syncrun
+*.out
