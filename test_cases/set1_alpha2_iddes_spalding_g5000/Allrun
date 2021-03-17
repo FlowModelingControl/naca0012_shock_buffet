@@ -1,0 +1,17 @@
+#!/bin/sh
+. ../../functions
+
+# specify a different absolute of relative image loation
+# the default image location and name is "../../of_v2012.sif"
+#setImage "/path/to/image.sif"
+
+# mesh creation with blockMesh
+singularityRun blockMesh
+# decompose mesh
+singularityRun decomposePar
+# distribute 0.orig directory to processor folders
+restore0Dir -processor
+# dummy file for post-processing
+touch post.foam
+# execute flow solver
+singularityRunParallel rhoPimpleFoam -parallel

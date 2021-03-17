@@ -1,0 +1,247 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2006                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+scale 0.6010500;
+
+domain
+{
+    xMin -20;
+    xMax  20;
+    yMin -10;
+    yMax  10;
+    zMin -0.01;
+    zMax  0.01;
+
+    // Number of cells
+    yCells  160; // airfoil to far field
+    yGap     32;  // resolution of trailing edge
+    xUCells 160;  // upstream
+    xMCellsLower 140; // middle low
+    xMCellsUpper 140; // middle up
+    xDCells 200; // downstream
+
+
+    // Mesh grading
+    yGrading       10000;  // airfoil to far field
+    yGradingFar     1000;  // airfoil to far field at xMax
+    xUGrading          5;  // towards centre upstream
+    xUGradingInv     0.2;  // inverse of xUGrading
+    xUGradingUp       10;  // towards centre upstream, farfield
+    xUGradingUpInv   0.1;  // inverse of xUGrading, farfield
+    xMGrading        1.0;  // towards trailing edge
+    xMGradingInv     1.0;  // towards trailing edge
+    xMGradingUp     10.0;  // towards trailing edge, farfield
+    xMGradingUpInv   0.1;  // towards trailing edge, farfield
+    xDGrading        100;  // downstream
+    xDGradingInv    0.01;  // inverse of downstream grading
+}
+
+airfoil
+{
+    xLead   0;
+    yLead   0;
+    xTrail  1;
+    xTrailShift 2;
+    yTrailUpper  0.012;
+    yTrailLower -0.012;
+    xUpper  0.3;
+    yUpper  0.06;
+    xLower  0.3;
+    yLower -0.06;
+}
+
+geometry
+{
+    airfoil
+    {
+        type   triSurfaceMesh;
+        file   "naca0012.stl";
+    }
+    cylinder
+    {
+        type   cylinder;
+        point1 ($:airfoil.xUpper 0 -1e3);
+        point2 ($:airfoil.xUpper 0  1e3);
+        radius $:domain.yMax;
+    }
+}
+
+vertices
+(
+    project ($airfoil.xLower $domain.yMin $domain.zMin) (cylinder)           // 0
+    ($airfoil.xTrailShift $domain.yMin $domain.zMin)                         // 1
+    ($domain.xMax $domain.yMin $domain.zMin)                                 // 2
+    project ($domain.xMin    $airfoil.yLead  $domain.zMin) (cylinder)        // 3
+    project ($airfoil.xLead  $airfoil.yLead  $domain.zMin) (airfoil)         // 4
+    project ($airfoil.xLower $airfoil.yLower $domain.zMin) (airfoil)         // 5
+    project ($airfoil.xTrail $airfoil.yTrailLower $domain.zMin) (airfoil)    // 6
+    ($domain.xMax $airfoil.yTrailLower $domain.zMin)                         // 7
+    project ($airfoil.xUpper $airfoil.yUpper $domain.zMin) (airfoil)         // 8
+    project ($airfoil.xTrail $airfoil.yTrailUpper $domain.zMin) (airfoil)    // 9
+    ($domain.xMax $airfoil.yTrailUpper $domain.zMin)                         // 10
+    project ($airfoil.xUpper $domain.yMax $domain.zMin) (cylinder)           // 11
+    ($airfoil.xTrailShift $domain.yMax $domain.zMin)                         // 12
+    ($domain.xMax $domain.yMax $domain.zMin)                                 // 13
+
+    project ($airfoil.xLower $domain.yMin $domain.zMax) (cylinder)           // 14
+    ($airfoil.xTrailShift $domain.yMin $domain.zMax)                         // 15
+    ($domain.xMax $domain.yMin $domain.zMax)                                 // 16
+    project ($domain.xMin    $airfoil.yLead  $domain.zMax) (cylinder)        // 17
+    project ($airfoil.xLead  $airfoil.yLead  $domain.zMax) (airfoil)         // 18
+    project ($airfoil.xLower $airfoil.yLower $domain.zMax) (airfoil)         // 19
+    project ($airfoil.xTrail $airfoil.yTrailLower $domain.zMax) (airfoil)    // 20
+    ($domain.xMax $airfoil.yTrailLower $domain.zMax)                         // 21
+    project ($airfoil.xUpper $airfoil.yUpper $domain.zMax) (airfoil)         // 22
+    project ($airfoil.xTrail $airfoil.yTrailUpper $domain.zMax) (airfoil)    // 23
+    ($domain.xMax $airfoil.yTrailUpper $domain.zMax)                         // 24
+    project ($airfoil.xUpper $domain.yMax $domain.zMax) (cylinder)           // 25
+    ($airfoil.xTrailShift $domain.yMax $domain.zMax)                         // 26
+    ($domain.xMax $domain.yMax $domain.zMax)                                 // 27
+);
+
+blocks
+(
+    // 0
+    hex (18 19 14 17 4 5 0 3)
+    ($:domain.xUCells $:domain.yCells 1)
+    edgeGrading ($:domain.xUGrading $:domain.xUGradingUpInv $:domain.xUGradingUpInv $:domain.xUGrading $:domain.yGrading $:domain.yGrading $:domain.yGrading $:domain.yGrading 1 1 1 1)
+
+    // 1
+    hex (19 20 15 14 5 6 1 0)
+    ($:domain.xMCellsLower $:domain.yCells 1)
+    edgeGrading ($:domain.xMGradingInv $:domain.xMGradingUpInv $:domain.xMGradingUpInv $:domain.xMGradingInv $:domain.yGrading $:domain.yGrading $:domain.yGrading $:domain.yGrading 1 1 1 1)
+
+    // 2
+    hex (20 21 16 15 6 7 2 1)
+    ($:domain.xDCells $:domain.yCells 1)
+    //simpleGrading ($:domain.xDGrading $:domain.yGrading 1)
+    edgeGrading ($:domain.xDGrading $:domain.xDGrading $:domain.xDGrading $:domain.xDGrading $:domain.yGrading $:domain.yGradingFar $:domain.yGradingFar $:domain.yGrading 1 1 1 1)
+
+    // 3
+    hex (22 18 17 25 8 4 3 11)
+    ($:domain.xUCells $:domain.yCells 1)
+    edgeGrading ($:domain.xUGradingInv $:domain.xUGradingUp $:domain.xUGradingUp $:domain.xUGradingInv $:domain.yGrading $:domain.yGrading $:domain.yGrading $:domain.yGrading 1 1 1 1)
+
+    // 4
+    hex (23 22 25 26 9 8 11 12)
+    ($:domain.xMCellsUpper $:domain.yCells 1)
+    edgeGrading ($:domain.xMGrading $:domain.xMGradingUp $:domain.xMGradingUp $:domain.xMGrading $:domain.yGrading $:domain.yGrading $:domain.yGrading $:domain.yGrading 1 1 1 1)
+
+    // 5
+    hex (24 23 26 27 10 9 12 13)
+    ($:domain.xDCells $:domain.yCells 1)
+    //simpleGrading ($:domain.xDGradingInv $:domain.yGrading 1)
+    edgeGrading ($:domain.xDGradingInv $:domain.xDGradingInv $:domain.xDGradingInv $:domain.xDGradingInv $:domain.yGradingFar $:domain.yGrading $:domain.yGrading $:domain.yGradingFar 1 1 1 1)
+
+    // 6
+    hex (21 20 23 24 7 6 9 10)
+    ($:domain.xDCells $:domain.yGap 1)
+    simpleGrading ($:domain.xDGradingInv 1 1)
+);
+
+edges
+(
+    project 4 5 (airfoil)
+    project 5 6 (airfoil)
+    project 4 8 (airfoil)
+    project 8 9 (airfoil)
+
+    project 18 19 (airfoil)
+    project 19 20 (airfoil)
+    project 18 22 (airfoil)
+    project 22 23 (airfoil)
+
+    project 3 0 (cylinder)
+    project 3 11 (cylinder)
+    project 17 14 (cylinder)
+    project 17 25 (cylinder)
+);
+
+boundary
+(
+    airfoil
+    {
+        type wall;
+        faces
+        (
+            (18 19 5 4)
+            (19 20 6 5)
+            (22 18 4 8)
+            (23 22 8 9)
+            (20 23 9 6)
+        );
+    }
+
+    inlet
+    {
+        type patch;
+        inGroups (freestream);
+        faces
+        (
+            (14 17 3 0)
+            (17 25 11 3)
+            (15 14 0 1)
+            (25 26 12 11)
+            (16 15 1 2)
+            (26 27 13 12)
+        );
+    }
+
+    outlet
+    {
+        type patch;
+        inGroups (freestream);
+        faces
+        (
+            (21 16 2 7)
+            (24 21 7 10)
+            (27 24 10 13)
+        );
+    }
+
+    back
+    {
+        type empty;
+        faces
+        (
+            (4 5 0 3)
+            (5 6 1 0)
+            (6 7 2 1)
+            (3 11 8 4)
+            (11 12 9 8)
+            (12 13 10 9)
+            (9 10 7 6)
+        );
+    }
+
+    front
+    {
+        type empty;
+        faces
+        (
+            (19 18 17 14)
+            (20 19 14 15)
+            (21 20 15 16)
+            (18 22 25 17)
+            (22 23 26 25)
+            (23 24 27 26)
+            (20 21 24 23)
+        );
+    }
+
+);
+
+// ************************************************************************* //
