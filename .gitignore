@@ -11,3 +11,5 @@ run
 *.sif
 syncrun
 *.out
+output
+report
