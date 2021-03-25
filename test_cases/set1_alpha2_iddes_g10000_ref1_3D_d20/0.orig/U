@@ -1,0 +1,70 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2006                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// see, e.g., https://en.wikipedia.org/wiki/Rotation_matrix
+// rotates a vector by alpha in counter-clockwise direction (around the z-axis)
+// Ufree is the free stream velocity vector at zero angle of attack
+alpha         2.0; // angle of attack in degrees
+Ufree         (255.22 0.0 0.0);
+// not to be changed
+alpha         #eval{ degToRad($alpha) };
+cos_alpha     #eval{ cos($alpha) };
+sin_alpha     #eval{ sin($alpha) };
+neg_sin_alpha #eval{ - $sin_alpha };
+rot_matrix    ($cos_alpha $neg_sin_alpha 0.0 $sin_alpha $cos_alpha 0.0 0.0 0.0 1.0);
+Uinlet        #eval{ $[(tensor)rot_matrix] & $[(vector)Ufree] };
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform $Uinlet;
+
+boundaryField
+{
+    inlet
+    {
+        type            freestreamVelocity;
+        freestreamValue uniform $Uinlet;
+    }
+
+    outlet
+    {
+        type            freestreamVelocity;
+        freestreamValue uniform $Uinlet;
+    }
+
+    airfoil
+    {
+        type            noSlip;
+    }
+
+    front
+    {
+        type            cyclic;
+    }
+
+    back
+    {
+        type            cyclic;
+    }
+    
+    processor
+    {
+        type  processor;
+        value $internalField;
+    }
+}
+
+// ************************************************************************* //
