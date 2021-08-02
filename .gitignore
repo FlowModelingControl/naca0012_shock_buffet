@@ -13,3 +13,5 @@ syncrun
 *.out
 output
 report
+literature
+dmd
