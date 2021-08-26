@@ -51,16 +51,39 @@ domain
 
 airfoil
 {
-    xLead   0;
-    yLead   0;
-    xTrail  1;
-    xTrailShift 2;
-    yTrailUpper  0.012;
-    yTrailLower -0.012;
-    xUpper  0.3;
+    xLead          0;
+    yLead          0;
+    
+    xThick          0.3;
+    xTrail          1;
+
+    xTrailShiftFar  1.7;  // 2
+    xMidShiftFar    1.4;  // 1 
+    xMidFar         4.7;  // 3
+    yMidFarD	   -1.212;  //8
+    yMidFarU        1.212;  //22
+
+    xTrailShift      1.2;  // 7
+    xMidTrailShift   0.8;  // 14
+    xMidShift        0.9;  // 6
+    yTrailShiftD    -0.212;   // 7
+    yMidTrailShiftD -0.032;   // 14
+    yMidShiftD      -0.232;   // 6
+    yTrailShiftU     0.212;   // 21
+    yMidTrailShiftU  0.032;   // 17
+    yMidShiftU       0.232;   // 20
+
+
+    xLeadShift     -0.3;  // 11
+    yThickShiftD   -0.26;   // 5
+    yThickShiftU    0.26;   // 19
+    
+    yTrailUpper  0.012;   // 18
+    yTrailLower -0.012;   // 15
     yUpper  0.06;
-    xLower  0.3;
     yLower -0.06;
+
+    
 }
 
 geometry
@@ -73,101 +96,196 @@ geometry
     cylinder
     {
         type   cylinder;
-        point1 ($:airfoil.xUpper 0 -1e3);
-        point2 ($:airfoil.xUpper 0  1e3);
+        point1 ($:airfoil.xThick 0 -1e3);
+        point2 ($:airfoil.xThick 0  1e3);
         radius $:domain.yMax;
     }
 }
 
 vertices
 (
-    project ($airfoil.xLower $domain.yMin $domain.zMin) (cylinder)           // 0
-    ($airfoil.xTrailShift $domain.yMin $domain.zMin)                         // 1
-    ($domain.xMax $domain.yMin $domain.zMin)                                 // 2
-    project ($domain.xMin    $airfoil.yLead  $domain.zMin) (cylinder)        // 3
-    project ($airfoil.xLead  $airfoil.yLead  $domain.zMin) (airfoil)         // 4
-    project ($airfoil.xLower $airfoil.yLower $domain.zMin) (airfoil)         // 5
-    project ($airfoil.xTrail $airfoil.yTrailLower $domain.zMin) (airfoil)    // 6
-    ($domain.xMax $airfoil.yTrailLower $domain.zMin)                         // 7
-    project ($airfoil.xUpper $airfoil.yUpper $domain.zMin) (airfoil)         // 8
-    project ($airfoil.xTrail $airfoil.yTrailUpper $domain.zMin) (airfoil)    // 9
-    ($domain.xMax $airfoil.yTrailUpper $domain.zMin)                         // 10
-    project ($airfoil.xUpper $domain.yMax $domain.zMin) (cylinder)           // 11
-    ($airfoil.xTrailShift $domain.yMax $domain.zMin)                         // 12
-    ($domain.xMax $domain.yMax $domain.zMin)                                 // 13
+    project ($airfoil.xThick $domain.yMin $domain.zMin) (cylinder)                    // 0
+    ($airfoil.xMidShiftFar $domain.yMin $domain.zMin)                                 // 1
+    ($airfoil.xTrailShiftFar $domain.yMin $domain.zMin)				      // 2
+    ($airfoil.xMidFar $domain.yMin $domain.zMin)				      // 3
+    ($domain.xMax $domain.yMin $domain.zMin) 					      // 4
+    ($airfoil.xThick $airfoil.yThickShiftD $domain.zMin) 			      // 5
+    ($airfoil.xMidShift $airfoil.yMidShiftD $domain.zMin) 			      // 6
+    ($airfoil.xTrailShift $airfoil.yTrailShiftD $domain.zMin) 			      // 7
+    ($airfoil.xMidFar $airfoil.yMidFarD $domain.zMin)  				      // 8
+    ($domain.xMax $airfoil.yMidFarD $domain.zMin)  				      // 9
+    project ($domain.xMin    $airfoil.yLead  $domain.zMin) (cylinder)                 // 10
+    ($airfoil.xLeadShift $airfoil.yLead $domain.zMin) 				      // 11
+    project ($airfoil.xLead  $airfoil.yLead  $domain.zMin) (airfoil) 		      // 12
+    project ($airfoil.xThick $airfoil.yLower $domain.zMin) (airfoil) 		      // 13
+    project ($airfoil.xMidTrailShift $airfoil.yMidTrailShiftD $domain.zMin) (airfoil) // 14
+    project ($airfoil.xTrail $airfoil.yTrailLower $domain.zMin) (airfoil)             // 15
+    project ($airfoil.xThick $airfoil.yUpper $domain.zMin) (airfoil)  		      // 16
+    project ($airfoil.xMidTrailShift $airfoil.yMidTrailShiftU $domain.zMin) (airfoil) // 17
+    project ($airfoil.xTrail $airfoil.yTrailUpper $domain.zMin) (airfoil)  	      // 18
+    ($airfoil.xThick $airfoil.yThickShiftU $domain.zMin) 		    	      // 19
+    ($airfoil.xMidShift $airfoil.yMidShiftU $domain.zMin) 			      // 20
+    ($airfoil.xTrailShift $airfoil.yTrailShiftU $domain.zMin) 			      // 21
+    ($airfoil.xMidFar $airfoil.yMidFarU $domain.zMin)  				      // 22
+    ($domain.xMax $airfoil.yMidFarU $domain.zMin)  				      // 23
+    project ($airfoil.xThick $domain.yMax $domain.zMin) (cylinder)		      // 24
+    ($airfoil.xMidShiftFar $domain.yMax $domain.zMin)				      // 25
+    ($airfoil.xTrailShiftFar $domain.yMax $domain.zMin)  			      // 26
+    ($airfoil.xMidFar $domain.yMax $domain.zMin) 				      // 27
+    ($domain.xMax $domain.yMax $domain.zMin) 					      // 28
+ 
+    project ($airfoil.xThick $domain.yMin $domain.zMax) (cylinder)           	      // 29
+    ($airfoil.xMidShiftFar $domain.yMin $domain.zMax)                        	      // 30
+    ($airfoil.xTrailShiftFar $domain.yMin $domain.zMax)				      // 31
+    ($airfoil.xMidFar $domain.yMin $domain.zMax)			              // 32
+    ($domain.xMax $domain.yMin $domain.zMax)					      // 33
+    ($airfoil.xThick $airfoil.yThickShiftD $domain.zMax) 			      // 34
+    ($airfoil.xMidShift $airfoil.yMidShiftD $domain.zMax)			      // 35
+    ($airfoil.xTrailShift $airfoil.yTrailShiftD $domain.zMax) 			      // 36
+    ($airfoil.xMidFar $airfoil.yMidFarD $domain.zMax)  				      // 37
+    ($domain.xMax $airfoil.yMidFarD $domain.zMax) 				      // 38
+    project ($domain.xMin    $airfoil.yLead  $domain.zMax) (cylinder)		      // 39
+    ($airfoil.xLeadShift $airfoil.yLead $domain.zMax) 				      // 40
+    project ($airfoil.xLead  $airfoil.yLead  $domain.zMax) (airfoil) 		      // 41
+    project ($airfoil.xThick $airfoil.yLower $domain.zMax) (airfoil) 		      // 42
+    project ($airfoil.xMidTrailShift $airfoil.yMidTrailShiftD $domain.zMax) (airfoil) // 43
+    project ($airfoil.xTrail $airfoil.yTrailLower $domain.zMax) (airfoil)     	      // 44
+    project ($airfoil.xThick $airfoil.yUpper $domain.zMax) (airfoil)  		      // 45
+    project ($airfoil.xMidTrailShift $airfoil.yMidTrailShiftU $domain.zMax) (airfoil) // 46
+    project ($airfoil.xTrail $airfoil.yTrailUpper $domain.zMax) (airfoil) 	      // 47
+    ($airfoil.xThick $airfoil.yThickShiftU $domain.zMax)   			      // 48
+    ($airfoil.xMidShift $airfoil.yMidShiftU $domain.zMax) 			      // 49
+    ($airfoil.xTrailShift $airfoil.yTrailShiftU $domain.zMax) 			      // 50
+    ($airfoil.xMidFar $airfoil.yMidFarU $domain.zMax)  				      // 51
+    ($domain.xMax $airfoil.yMidFarU $domain.zMax)  				      // 52
+    project ($airfoil.xThick $domain.yMax $domain.zMax) (cylinder)     	 	      // 53
+    ($airfoil.xMidShiftFar $domain.yMax $domain.zMax)     			      // 54
+    ($airfoil.xTrailShiftFar $domain.yMax $domain.zMax)  			      // 55
+    ($airfoil.xMidFar $domain.yMax $domain.zMax)  				      // 56
+    ($domain.xMax $domain.yMax $domain.zMax)  					      // 57
 
-    project ($airfoil.xLower $domain.yMin $domain.zMax) (cylinder)           // 14
-    ($airfoil.xTrailShift $domain.yMin $domain.zMax)                         // 15
-    ($domain.xMax $domain.yMin $domain.zMax)                                 // 16
-    project ($domain.xMin    $airfoil.yLead  $domain.zMax) (cylinder)        // 17
-    project ($airfoil.xLead  $airfoil.yLead  $domain.zMax) (airfoil)         // 18
-    project ($airfoil.xLower $airfoil.yLower $domain.zMax) (airfoil)         // 19
-    project ($airfoil.xTrail $airfoil.yTrailLower $domain.zMax) (airfoil)    // 20
-    ($domain.xMax $airfoil.yTrailLower $domain.zMax)                         // 21
-    project ($airfoil.xUpper $airfoil.yUpper $domain.zMax) (airfoil)         // 22
-    project ($airfoil.xTrail $airfoil.yTrailUpper $domain.zMax) (airfoil)    // 23
-    ($domain.xMax $airfoil.yTrailUpper $domain.zMax)                         // 24
-    project ($airfoil.xUpper $domain.yMax $domain.zMax) (cylinder)           // 25
-    ($airfoil.xTrailShift $domain.yMax $domain.zMax)                         // 26
-    ($domain.xMax $domain.yMax $domain.zMax)                                 // 27
 );
 
 blocks
-(
+(   
     // 0
-    hex (18 19 14 17 4 5 0 3)
-    ($:domain.xUCells $:domain.yCells 1)
-    edgeGrading ($:domain.xUGrading $:domain.xUGradingUpInv $:domain.xUGradingUpInv $:domain.xUGrading $:domain.yGrading $:domain.yGrading $:domain.yGrading $:domain.yGrading 1 1 1 1)
+    hex (40 34 29 39 11 5 0 10)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
 
     // 1
-    hex (19 20 15 14 5 6 1 0)
-    ($:domain.xMCellsLower $:domain.yCells 1)
-    edgeGrading ($:domain.xMGradingInv $:domain.xMGradingUpInv $:domain.xMGradingUpInv $:domain.xMGradingInv $:domain.yGrading $:domain.yGrading $:domain.yGrading $:domain.yGrading 1 1 1 1)
+    hex (35 30 29 34 6 1 0 5)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
 
     // 2
-    hex (20 21 16 15 6 7 2 1)
-    ($:domain.xDCells $:domain.yCells 1)
-    //simpleGrading ($:domain.xDGrading $:domain.yGrading 1)
-    edgeGrading ($:domain.xDGrading $:domain.xDGrading $:domain.xDGrading $:domain.xDGrading $:domain.yGrading $:domain.yGradingFar $:domain.yGradingFar $:domain.yGrading 1 1 1 1)
+    hex (36 31 30 35 7 2 1 6)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
 
     // 3
-    hex (22 18 17 25 8 4 3 11)
-    ($:domain.xUCells $:domain.yCells 1)
-    edgeGrading ($:domain.xUGradingInv $:domain.xUGradingUp $:domain.xUGradingUp $:domain.xUGradingInv $:domain.yGrading $:domain.yGrading $:domain.yGrading $:domain.yGrading 1 1 1 1)
+    hex (37 32 31 36 8 3 2 7)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
 
     // 4
-    hex (23 22 25 26 9 8 11 12)
-    ($:domain.xMCellsUpper $:domain.yCells 1)
-    edgeGrading ($:domain.xMGrading $:domain.xMGradingUp $:domain.xMGradingUp $:domain.xMGrading $:domain.yGrading $:domain.yGrading $:domain.yGrading $:domain.yGrading 1 1 1 1)
+    hex (38 33 32 37 9 4 3 8)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
 
     // 5
-    hex (24 23 26 27 10 9 12 13)
-    ($:domain.xDCells $:domain.yCells 1)
-    //simpleGrading ($:domain.xDGradingInv $:domain.yGrading 1)
-    edgeGrading ($:domain.xDGradingInv $:domain.xDGradingInv $:domain.xDGradingInv $:domain.xDGradingInv $:domain.yGradingFar $:domain.yGrading $:domain.yGrading $:domain.yGradingFar 1 1 1 1)
+    hex (41 42 34 40 12 13 5 11)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
 
     // 6
-    hex (21 20 23 24 7 6 9 10)
-    ($:domain.xDCells $:domain.yGap 1)
-    simpleGrading ($:domain.xDGradingInv 1 1)
+    hex (42 43 35 34 13 14 6 5)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
+
+    // 7
+    hex (43 44 36 35 14 15 7 6)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
+
+    // 8
+    hex (47 50 36 44 18 21 7 15)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
+
+    // 9
+    hex (50 51 37 36 21 22 8 7)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
+
+    // 10
+    hex (51 52 38 37 22 23 9 8)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
+
+    // 11
+    hex (48 45 41 40 19 16 12 11)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
+
+    // 12
+    hex (48 49 46 45 19 20 17 16)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
+
+    // 13
+    hex (49 50 47 46 20 21 18 17)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
+
+    // 14
+    hex (53 48 40 39 24 19 11 10)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
+
+    // 15
+    hex (54 49 48 53 25 20 19 24)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
+
+    // 16
+    hex (55 50 49 54 26 21 20 25)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
+
+    // 17
+    hex (56 51 50 55 27 22 21 26)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
+
+    // 18
+    hex (57 52 51 56 28 23 22 27)
+    (240 240 1)
+    edgeGrading (1 1 1 1 1 1 1 1 1 1 1 1)
+
 );
+
 
 edges
 (
-    project 4 5 (airfoil)
-    project 5 6 (airfoil)
-    project 4 8 (airfoil)
-    project 8 9 (airfoil)
+    project 12 13 (airfoil)
+    project 13 14 (airfoil)
+    project 14 15 (airfoil)
+    project 12 16 (airfoil)
+    project 16 17 (airfoil)
+    project 17 18 (airfoil)
 
-    project 18 19 (airfoil)
-    project 19 20 (airfoil)
-    project 18 22 (airfoil)
-    project 22 23 (airfoil)
-
-    project 3 0 (cylinder)
-    project 3 11 (cylinder)
-    project 17 14 (cylinder)
-    project 17 25 (cylinder)
+    project 41 42 (airfoil)
+    project 42 43 (airfoil)
+    project 43 44 (airfoil)
+    project 41 45 (airfoil)
+    project 45 46 (airfoil)
+    project 46 47 (airfoil)
+ 
+    project 10 0  (cylinder)
+    project 10 24 (cylinder)
+    project 39 29 (cylinder)
+    project 39 53 (cylinder)
 );
 
 boundary
@@ -177,11 +295,13 @@ boundary
         type wall;
         faces
         (
-            (18 19 5 4)
-            (19 20 6 5)
-            (22 18 4 8)
-            (23 22 8 9)
-            (20 23 9 6)
+            (41 42 13 12)
+            (42 43 14 13)
+            (43 44 15 14)
+            (41 45 16 12)
+            (45 46 17 16)
+	    (46 47 18 17)
+            (47 44 15 18)
         );
     }
 
@@ -191,12 +311,16 @@ boundary
         inGroups (freestream);
         faces
         (
-            (14 17 3 0)
-            (17 25 11 3)
-            (15 14 0 1)
-            (25 26 12 11)
-            (16 15 1 2)
-            (26 27 13 12)
+            (10 0 29 39)
+            (29 30 1 0)
+            (30 31 2 1)
+            (31 32 3 2)
+            (32 33 4 3)
+            (10 24 53 39)
+            (53 54 25 24)
+	    (54 55 26 25)
+            (55 56 27 26)
+            (56 57 28 27)
         );
     }
 
@@ -206,9 +330,9 @@ boundary
         inGroups (freestream);
         faces
         (
-            (21 16 2 7)
-            (24 21 7 10)
-            (27 24 10 13)
+            (33 38 9 4)
+            (38 52 23 9)
+            (52 57 28 23)
         );
     }
 
@@ -217,13 +341,25 @@ boundary
         type empty;
         faces
         (
-            (4 5 0 3)
-            (5 6 1 0)
-            (6 7 2 1)
-            (3 11 8 4)
-            (11 12 9 8)
-            (12 13 10 9)
-            (9 10 7 6)
+            (11 5 0 10)    // 0
+            (5 6 1 0)      // 1
+            (6 7 2 1)      // 2
+            (7 8 3 2)      // 3
+            (8 9 4 3)      // 4
+            (12 13 5 11)   // 5
+            (13 14 6 5)    // 6
+	    (14 15 7 6)    // 7
+            (18 21 7 15)   // 8
+            (21 22 8 7)    // 9
+            (22 23 9 8)    // 10
+            (19 16 12 11)  // 11
+            (19 20 17 16)  // 12
+            (20 21 18 17)  // 13
+            (24 19 11 10)  // 14
+            (24 25 20 19)  // 15
+	    (25 26 21 20)  // 16
+            (26 27 22 21)  // 17
+            (27 28 23 22)  // 18
         );
     }
 
@@ -232,13 +368,26 @@ boundary
         type empty;
         faces
         (
-            (19 18 17 14)
-            (20 19 14 15)
-            (21 20 15 16)
-            (18 22 25 17)
-            (22 23 26 25)
-            (23 24 27 26)
-            (20 21 24 23)
+            (40 34 29 39)  // 0
+            (34 35 30 29)  // 1
+            (35 36 31 30)  // 2
+            (36 37 32 31)  // 3
+            (37 38 33 32)  // 4
+            (41 42 34 40)  // 5
+            (42 43 35 34)  // 6
+            (43 44 36 35)  // 7
+	    (47 50 36 44)  // 8
+	    (50 51 37 36)  // 9
+            (51 52 38 37)  // 10
+            (48 45 41 40)  // 11
+            (48 49 46 45)  // 12
+	    (49 50 47 46)  // 13
+	    (53 48 40 39)  // 14
+	    (53 54 49 48)  // 15
+	    (54 55 50 49)  // 16
+	    (55 56 51 50)  // 17
+            (56 57 52 51)  // 18
+
         );
     }
 
