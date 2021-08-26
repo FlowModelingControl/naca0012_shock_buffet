@@ -57,15 +57,15 @@ airfoil
     xThick          0.3;
     xTrail          1;
 
-    xTrailShiftFar  1.7;  // 2
-    xMidShiftFar    1.4;  // 1 
-    xMidFar         4.7;  // 3
-    yMidFarD	   -1.212;  //8
-    yMidFarU        1.212;  //22
+    xTrailShiftFar  1.7;      // 2
+    xMidShiftFar    1.4;      // 1 
+    xMidFar         4.7;      // 3
+    yMidFarD       -1.212;    //8
+    yMidFarU        1.212;    //22
 
-    xTrailShift      1.2;  // 7
-    xMidTrailShift   0.8;  // 14
-    xMidShift        0.9;  // 6
+    xTrailShift      1.2;     // 7
+    xMidTrailShift   0.8;     // 14
+    xMidShift        0.9;     // 6
     yTrailShiftD    -0.212;   // 7
     yMidTrailShiftD -0.032;   // 14
     yMidShiftD      -0.232;   // 6
@@ -74,12 +74,12 @@ airfoil
     yMidShiftU       0.232;   // 20
 
 
-    xLeadShift     -0.3;  // 11
-    yThickShiftD   -0.26;   // 5
-    yThickShiftU    0.26;   // 19
+    xLeadShift     -0.3;      // 11
+    yThickShiftD   -0.26;     // 5
+    yThickShiftU    0.26;     // 19
     
-    yTrailUpper  0.012;   // 18
-    yTrailLower -0.012;   // 15
+    yTrailUpper  0.012;       // 18
+    yTrailLower -0.012;       // 15
     yUpper  0.06;
     yLower -0.06;
 
@@ -106,63 +106,63 @@ vertices
 (
     project ($airfoil.xThick $domain.yMin $domain.zMin) (cylinder)                    // 0
     ($airfoil.xMidShiftFar $domain.yMin $domain.zMin)                                 // 1
-    ($airfoil.xTrailShiftFar $domain.yMin $domain.zMin)				      // 2
-    ($airfoil.xMidFar $domain.yMin $domain.zMin)				      // 3
-    ($domain.xMax $domain.yMin $domain.zMin) 					      // 4
-    ($airfoil.xThick $airfoil.yThickShiftD $domain.zMin) 			      // 5
-    ($airfoil.xMidShift $airfoil.yMidShiftD $domain.zMin) 			      // 6
-    ($airfoil.xTrailShift $airfoil.yTrailShiftD $domain.zMin) 			      // 7
-    ($airfoil.xMidFar $airfoil.yMidFarD $domain.zMin)  				      // 8
-    ($domain.xMax $airfoil.yMidFarD $domain.zMin)  				      // 9
+    ($airfoil.xTrailShiftFar $domain.yMin $domain.zMin)                               // 2
+    ($airfoil.xMidFar $domain.yMin $domain.zMin)                                      // 3
+    ($domain.xMax $domain.yMin $domain.zMin)                                          // 4
+    ($airfoil.xThick $airfoil.yThickShiftD $domain.zMin)                              // 5
+    ($airfoil.xMidShift $airfoil.yMidShiftD $domain.zMin)                             // 6
+    ($airfoil.xTrailShift $airfoil.yTrailShiftD $domain.zMin)                         // 7
+    ($airfoil.xMidFar $airfoil.yMidFarD $domain.zMin)                                 // 8
+    ($domain.xMax $airfoil.yMidFarD $domain.zMin)                                     // 9
     project ($domain.xMin    $airfoil.yLead  $domain.zMin) (cylinder)                 // 10
-    ($airfoil.xLeadShift $airfoil.yLead $domain.zMin) 				      // 11
-    project ($airfoil.xLead  $airfoil.yLead  $domain.zMin) (airfoil) 		      // 12
-    project ($airfoil.xThick $airfoil.yLower $domain.zMin) (airfoil) 		      // 13
+    ($airfoil.xLeadShift $airfoil.yLead $domain.zMin)                                 // 11
+    project ($airfoil.xLead  $airfoil.yLead  $domain.zMin) (airfoil)                  // 12
+    project ($airfoil.xThick $airfoil.yLower $domain.zMin) (airfoil)                  // 13
     project ($airfoil.xMidTrailShift $airfoil.yMidTrailShiftD $domain.zMin) (airfoil) // 14
     project ($airfoil.xTrail $airfoil.yTrailLower $domain.zMin) (airfoil)             // 15
-    project ($airfoil.xThick $airfoil.yUpper $domain.zMin) (airfoil)  		      // 16
+    project ($airfoil.xThick $airfoil.yUpper $domain.zMin) (airfoil)                  // 16
     project ($airfoil.xMidTrailShift $airfoil.yMidTrailShiftU $domain.zMin) (airfoil) // 17
-    project ($airfoil.xTrail $airfoil.yTrailUpper $domain.zMin) (airfoil)  	      // 18
-    ($airfoil.xThick $airfoil.yThickShiftU $domain.zMin) 		    	      // 19
-    ($airfoil.xMidShift $airfoil.yMidShiftU $domain.zMin) 			      // 20
-    ($airfoil.xTrailShift $airfoil.yTrailShiftU $domain.zMin) 			      // 21
-    ($airfoil.xMidFar $airfoil.yMidFarU $domain.zMin)  				      // 22
-    ($domain.xMax $airfoil.yMidFarU $domain.zMin)  				      // 23
-    project ($airfoil.xThick $domain.yMax $domain.zMin) (cylinder)		      // 24
-    ($airfoil.xMidShiftFar $domain.yMax $domain.zMin)				      // 25
-    ($airfoil.xTrailShiftFar $domain.yMax $domain.zMin)  			      // 26
-    ($airfoil.xMidFar $domain.yMax $domain.zMin) 				      // 27
-    ($domain.xMax $domain.yMax $domain.zMin) 					      // 28
+    project ($airfoil.xTrail $airfoil.yTrailUpper $domain.zMin) (airfoil)             // 18
+    ($airfoil.xThick $airfoil.yThickShiftU $domain.zMin)                              // 19
+    ($airfoil.xMidShift $airfoil.yMidShiftU $domain.zMin)                             // 20
+    ($airfoil.xTrailShift $airfoil.yTrailShiftU $domain.zMin)                         // 21
+    ($airfoil.xMidFar $airfoil.yMidFarU $domain.zMin)                                 // 22
+    ($domain.xMax $airfoil.yMidFarU $domain.zMin)                                     // 23
+    project ($airfoil.xThick $domain.yMax $domain.zMin) (cylinder)                    // 24
+    ($airfoil.xMidShiftFar $domain.yMax $domain.zMin)                                 // 25
+    ($airfoil.xTrailShiftFar $domain.yMax $domain.zMin)                               // 26
+    ($airfoil.xMidFar $domain.yMax $domain.zMin)                                      // 27
+    ($domain.xMax $domain.yMax $domain.zMin)                                          // 28
  
-    project ($airfoil.xThick $domain.yMin $domain.zMax) (cylinder)           	      // 29
-    ($airfoil.xMidShiftFar $domain.yMin $domain.zMax)                        	      // 30
-    ($airfoil.xTrailShiftFar $domain.yMin $domain.zMax)				      // 31
-    ($airfoil.xMidFar $domain.yMin $domain.zMax)			              // 32
-    ($domain.xMax $domain.yMin $domain.zMax)					      // 33
-    ($airfoil.xThick $airfoil.yThickShiftD $domain.zMax) 			      // 34
-    ($airfoil.xMidShift $airfoil.yMidShiftD $domain.zMax)			      // 35
-    ($airfoil.xTrailShift $airfoil.yTrailShiftD $domain.zMax) 			      // 36
-    ($airfoil.xMidFar $airfoil.yMidFarD $domain.zMax)  				      // 37
-    ($domain.xMax $airfoil.yMidFarD $domain.zMax) 				      // 38
-    project ($domain.xMin    $airfoil.yLead  $domain.zMax) (cylinder)		      // 39
-    ($airfoil.xLeadShift $airfoil.yLead $domain.zMax) 				      // 40
-    project ($airfoil.xLead  $airfoil.yLead  $domain.zMax) (airfoil) 		      // 41
-    project ($airfoil.xThick $airfoil.yLower $domain.zMax) (airfoil) 		      // 42
+    project ($airfoil.xThick $domain.yMin $domain.zMax) (cylinder)                    // 29
+    ($airfoil.xMidShiftFar $domain.yMin $domain.zMax)                                 // 30
+    ($airfoil.xTrailShiftFar $domain.yMin $domain.zMax)                               // 31
+    ($airfoil.xMidFar $domain.yMin $domain.zMax)                                      // 32
+    ($domain.xMax $domain.yMin $domain.zMax)                                          // 33
+    ($airfoil.xThick $airfoil.yThickShiftD $domain.zMax)                              // 34
+    ($airfoil.xMidShift $airfoil.yMidShiftD $domain.zMax)                             // 35
+    ($airfoil.xTrailShift $airfoil.yTrailShiftD $domain.zMax)                         // 36
+    ($airfoil.xMidFar $airfoil.yMidFarD $domain.zMax)                                 // 37
+    ($domain.xMax $airfoil.yMidFarD $domain.zMax)                                     // 38
+    project ($domain.xMin    $airfoil.yLead  $domain.zMax) (cylinder)                 // 39
+    ($airfoil.xLeadShift $airfoil.yLead $domain.zMax)                                 // 40
+    project ($airfoil.xLead  $airfoil.yLead  $domain.zMax) (airfoil)                  // 41
+    project ($airfoil.xThick $airfoil.yLower $domain.zMax) (airfoil)                  // 42
     project ($airfoil.xMidTrailShift $airfoil.yMidTrailShiftD $domain.zMax) (airfoil) // 43
-    project ($airfoil.xTrail $airfoil.yTrailLower $domain.zMax) (airfoil)     	      // 44
-    project ($airfoil.xThick $airfoil.yUpper $domain.zMax) (airfoil)  		      // 45
+    project ($airfoil.xTrail $airfoil.yTrailLower $domain.zMax) (airfoil)             // 44
+    project ($airfoil.xThick $airfoil.yUpper $domain.zMax) (airfoil)                  // 45
     project ($airfoil.xMidTrailShift $airfoil.yMidTrailShiftU $domain.zMax) (airfoil) // 46
-    project ($airfoil.xTrail $airfoil.yTrailUpper $domain.zMax) (airfoil) 	      // 47
-    ($airfoil.xThick $airfoil.yThickShiftU $domain.zMax)   			      // 48
-    ($airfoil.xMidShift $airfoil.yMidShiftU $domain.zMax) 			      // 49
-    ($airfoil.xTrailShift $airfoil.yTrailShiftU $domain.zMax) 			      // 50
-    ($airfoil.xMidFar $airfoil.yMidFarU $domain.zMax)  				      // 51
-    ($domain.xMax $airfoil.yMidFarU $domain.zMax)  				      // 52
-    project ($airfoil.xThick $domain.yMax $domain.zMax) (cylinder)     	 	      // 53
-    ($airfoil.xMidShiftFar $domain.yMax $domain.zMax)     			      // 54
-    ($airfoil.xTrailShiftFar $domain.yMax $domain.zMax)  			      // 55
-    ($airfoil.xMidFar $domain.yMax $domain.zMax)  				      // 56
-    ($domain.xMax $domain.yMax $domain.zMax)  					      // 57
+    project ($airfoil.xTrail $airfoil.yTrailUpper $domain.zMax) (airfoil)             // 47
+    ($airfoil.xThick $airfoil.yThickShiftU $domain.zMax)                              // 48
+    ($airfoil.xMidShift $airfoil.yMidShiftU $domain.zMax)                             // 49
+    ($airfoil.xTrailShift $airfoil.yTrailShiftU $domain.zMax)                         // 50
+    ($airfoil.xMidFar $airfoil.yMidFarU $domain.zMax)                                 // 51
+    ($domain.xMax $airfoil.yMidFarU $domain.zMax)                                     // 52
+    project ($airfoil.xThick $domain.yMax $domain.zMax) (cylinder)                    // 53
+    ($airfoil.xMidShiftFar $domain.yMax $domain.zMax)                                 // 54
+    ($airfoil.xTrailShiftFar $domain.yMax $domain.zMax)                               // 55
+    ($airfoil.xMidFar $domain.yMax $domain.zMax)                                      // 56
+    ($domain.xMax $domain.yMax $domain.zMax)                                          // 57
 
 );
 
@@ -300,7 +300,7 @@ boundary
             (43 44 15 14)
             (41 45 16 12)
             (45 46 17 16)
-	    (46 47 18 17)
+            (46 47 18 17)
             (47 44 15 18)
         );
     }
@@ -318,7 +318,7 @@ boundary
             (32 33 4 3)
             (10 24 53 39)
             (53 54 25 24)
-	    (54 55 26 25)
+            (54 55 26 25)
             (55 56 27 26)
             (56 57 28 27)
         );
@@ -348,7 +348,7 @@ boundary
             (8 9 4 3)      // 4
             (12 13 5 11)   // 5
             (13 14 6 5)    // 6
-	    (14 15 7 6)    // 7
+            (14 15 7 6)    // 7
             (18 21 7 15)   // 8
             (21 22 8 7)    // 9
             (22 23 9 8)    // 10
@@ -357,7 +357,7 @@ boundary
             (20 21 18 17)  // 13
             (24 19 11 10)  // 14
             (24 25 20 19)  // 15
-	    (25 26 21 20)  // 16
+            (25 26 21 20)  // 16
             (26 27 22 21)  // 17
             (27 28 23 22)  // 18
         );
@@ -376,16 +376,16 @@ boundary
             (41 42 34 40)  // 5
             (42 43 35 34)  // 6
             (43 44 36 35)  // 7
-	    (47 50 36 44)  // 8
-	    (50 51 37 36)  // 9
+            (47 50 36 44)  // 8
+            (50 51 37 36)  // 9
             (51 52 38 37)  // 10
             (48 45 41 40)  // 11
             (48 49 46 45)  // 12
-	    (49 50 47 46)  // 13
-	    (53 48 40 39)  // 14
-	    (53 54 49 48)  // 15
-	    (54 55 50 49)  // 16
-	    (55 56 51 50)  // 17
+            (49 50 47 46)  // 13
+            (53 48 40 39)  // 14
+            (53 54 49 48)  // 15
+            (54 55 50 49)  // 16
+            (55 56 51 50)  // 17
             (56 57 52 51)  // 18
 
         );
