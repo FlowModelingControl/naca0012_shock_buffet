@@ -20,7 +20,7 @@ domain
 {
     xMin -20;
     xMax  20;
-    yMin -10;
+    yMin -10;   
     yMax  10;
     zMin -0.01;
     zMax  0.01;
@@ -51,38 +51,35 @@ domain
 
 airfoil
 {
-    xLead          0;
-    yLead          0;
+    xLead            0;                               // 12
+    yLead            0;                               // 11, 12
     
-    xThick          0.3;
-    xTrail          1;
+    xThick           0.3;                             // 0, 13, 16, 19, 24
+    xTrail           1;                               // 15, 18
 
-    xTrailShiftFar  1.7;      // 2
-    xMidShiftFar    1.4;      // 1 
-    xMidFar         4.7;      // 3
-    yMidFarD       -1.212;    //8
-    yMidFarU        1.212;    //22
+    yTrailUpper      0.012;                           // 18
+    yTrailLower     -0.012;                           // 15
+    yUpper           0.06;                            // 16
+    yLower          -0.06;                            // 13
 
-    xTrailShift      1.2;     // 7
-    xMidTrailShift   0.8;     // 14
-    xMidShift        0.9;     // 6
-    yTrailShiftD    -0.212;   // 7
-    yMidTrailShiftD -0.032;   // 14
-    yMidShiftD      -0.232;   // 6
-    yTrailShiftU     0.212;   // 21
-    yMidTrailShiftU  0.032;   // 17
-    yMidShiftU       0.232;   // 20
-
-
-    xLeadShift     -0.3;      // 11
-    yThickShiftD   -0.26;     // 5
-    yThickShiftU    0.26;     // 19
+    xMidTrailShift   #eval "$xTrail          - 0.2";   // 14, 17
+    yMidTrailShiftD  #eval "$yTrailLower     - 0.02";  // 14
+    xMidShift        #eval "$xMidTrailShift  + 0.1";   // 6, 20
+    yMidShiftD       #eval "$yMidTrailShiftD - 0.2";   // 6
+    xMidShiftFar     #eval "$xMidShift       + 0.5";   // 1, 25
+    xTrailShift      #eval "$xTrail          + 0.2";   // 7, 21
+    yTrailShiftD     #eval "$yTrailLower     - 0.2";   // 7
+    xTrailShiftFar   #eval "$xTrailShift     + 0.5";   // 2, 26
+    xMidFar          #eval "$xTrailShift     + 4.5";   // 3, 8, 22, 27 
+    yMidFarD         #eval "$yTrailShiftD    - 1";     // 8, 9
+    yThickShiftD     #eval "$yThick          - 0.2";   // 5
+    xLeadShift       #eval "$xLead           - 0.3";   // 11
     
-    yTrailUpper  0.012;       // 18
-    yTrailLower -0.012;       // 15
-    yUpper  0.06;
-    yLower -0.06;
-
+    yMidFarU         #eval "-1 * $yMidFarD";           // 22, 23
+    yTrailShiftU     #eval "-1 * $yTrailShiftD";       // 21
+    yMidTrailShiftU  #eval "-1 * $yMidTrailShiftD";    // 17
+    yMidShiftU       #eval "-1 * $yMidShiftD";         // 20
+    yThickShiftU     #eval "-1 * $yThickShiftD";       // 19
     
 }
 
