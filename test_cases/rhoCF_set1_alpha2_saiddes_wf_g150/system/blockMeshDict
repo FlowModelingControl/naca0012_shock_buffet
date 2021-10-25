@@ -1,0 +1,454 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2006                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+scale 0.6010500;
+
+domain
+{
+    xMin -20;
+    xMax  20;
+    yMin -10;   
+    yMax  10;
+    zMin -0.01;
+    zMax  0.01;
+
+
+    // Number of cells
+    xUCells   75;  // x0 : 0, 5, 11, 14
+    yUCells   75;  // y0 : 0, 1, 2, 3, 4, 14, 15, 16, 17, 18
+    yFar_1    70;  // y1 : 1, 6, 12, 15
+    yFar_2    35;  // y2 : 2, 7, 13, 16
+    yFar_3   150;  // y3 : 3, 9, 17
+    yFar_4    20;  // y4 : 4, 10, 18
+    yMid      150;  // y5 : 5, 6, 7, 8, 11, 12, 13
+    yTrail    50;  // y8 : 8, 9, 10
+    
+
+    // Mesh grading
+    NoGrad            1;   //
+    xUGradIn          5;   //
+    xUGradMid         1;   //
+    xUGradOut         10;  //
+    yUGradMid         100; //
+    yDGradMid         20;  //
+    yDGradFar         20;  //
+    yDGradOut         5;  //
+    yGradAirfoil      150;   //
+    
+
+    xUGradInInv      #eval "1  / $xUGradIn";      //
+    xUGradMidInv     #eval "1 / $xUGradMid";      //
+    xUGradOutInv     #eval "1 / $xUGradOut";      //
+    yUGradMidInv     #eval "1 / $yUGradMid";      //
+    yDGradMidInv     #eval "1 / $yDGradMid";      //
+    yDGradFarInv     #eval "1 / $yDGradFar";      //
+    yDGradOutInv     #eval "1 / $yDGradOut";      //
+    yGradAirfoilInv  #eval "1 / $yGradAirfoil";   //  
+
+}
+
+airfoil
+{
+    xLead            0;                               // 12
+    yLead            0;                               // 11, 12
+    
+    xThick           0.3;                             // 0, 13, 16, 19, 24
+    xTrail           1;                               // 15, 18
+
+    yTrailUpper      0.012;                           // 18
+    yTrailLower     -0.012;                           // 15
+    yUpper           0.06;                            // 16
+    yLower          -0.06;                            // 13
+
+    xMidTrailShift   #eval "$xTrail          - 0.2";   // 14, 17
+    yMidTrailShiftD  #eval "$yTrailLower     - 0.02";  // 14
+    xMidShift        #eval "$xMidTrailShift  + 0.1";   // 6, 20
+    yMidShiftD       #eval "$yMidTrailShiftD - 0.2";   // 6
+    xMidShiftFar     #eval "$xMidShift       + 0.5";   // 1, 25
+    xTrailShift      #eval "$xTrail          + 0.2";   // 7, 21
+    yTrailShiftD     #eval "$yTrailLower     - 0.2";   // 7
+    xTrailShiftFar   #eval "$xTrailShift     + 0.5";   // 2, 26
+    xMidFar          #eval "$xTrailShift     + 4.5";   // 3, 8, 22, 27 
+    yMidFarD         #eval "$yTrailShiftD    - 1";     // 8, 9
+    yThickShiftD     #eval "$yThick          - 0.2";   // 5
+    xLeadShift       #eval "$xLead           - 0.3";   // 11
+    
+    yMidFarU         #eval "-1 * $yMidFarD";           // 22, 23
+    yTrailShiftU     #eval "-1 * $yTrailShiftD";       // 21
+    yMidTrailShiftU  #eval "-1 * $yMidTrailShiftD";    // 17
+    yMidShiftU       #eval "-1 * $yMidShiftD";         // 20
+    yThickShiftU     #eval "-1 * $yThickShiftD";       // 19
+    
+}
+
+geometry
+{
+    airfoil
+    {
+        type   triSurfaceMesh;
+        file   "naca0012.stl";
+    }
+    scaled_airfoil
+    {
+        type   triSurfaceMesh;
+        file   "scaled_airfoil.stl";
+    }
+    cylinder
+    {
+        type   cylinder;
+        point1 ($:airfoil.xThick 0 -1e3);
+        point2 ($:airfoil.xThick 0  1e3);
+        radius $:domain.yMax;
+    }
+}
+
+vertices
+(
+    project ($airfoil.xThick $domain.yMin $domain.zMin) (cylinder)                    // 0
+    ($airfoil.xMidShiftFar $domain.yMin $domain.zMin)                                 // 1
+    ($airfoil.xTrailShiftFar $domain.yMin $domain.zMin)                               // 2
+    ($airfoil.xMidFar $domain.yMin $domain.zMin)                                      // 3
+    ($domain.xMax $domain.yMin $domain.zMin)                                          // 4
+    project ($airfoil.xThick $airfoil.yThickShiftD $domain.zMin) (scaled_airfoil)     // 5
+    ($airfoil.xMidShift $airfoil.yMidShiftD $domain.zMin)                             // 6
+    ($airfoil.xTrailShift $airfoil.yTrailShiftD $domain.zMin)                         // 7
+    ($airfoil.xMidFar $airfoil.yMidFarD $domain.zMin)                                 // 8
+    ($domain.xMax $airfoil.yMidFarD $domain.zMin)                                     // 9
+    project ($domain.xMin    $airfoil.yLead  $domain.zMin) (cylinder)                 // 10
+    project ($airfoil.xLeadShift $airfoil.yLead $domain.zMin) (scaled_airfoil)        // 11
+    project ($airfoil.xLead  $airfoil.yLead  $domain.zMin) (airfoil)                  // 12
+    project ($airfoil.xThick $airfoil.yLower $domain.zMin) (airfoil)                  // 13
+    project ($airfoil.xMidTrailShift $airfoil.yMidTrailShiftD $domain.zMin) (airfoil) // 14
+    project ($airfoil.xTrail $airfoil.yTrailLower $domain.zMin) (airfoil)             // 15
+    project ($airfoil.xThick $airfoil.yUpper $domain.zMin) (airfoil)                  // 16
+    project ($airfoil.xMidTrailShift $airfoil.yMidTrailShiftU $domain.zMin) (airfoil) // 17
+    project ($airfoil.xTrail $airfoil.yTrailUpper $domain.zMin) (airfoil)             // 18
+    project ($airfoil.xThick $airfoil.yThickShiftU $domain.zMin) (scaled_airfoil)     // 19
+    ($airfoil.xMidShift $airfoil.yMidShiftU $domain.zMin)                             // 20
+    ($airfoil.xTrailShift $airfoil.yTrailShiftU $domain.zMin)                         // 21
+    ($airfoil.xMidFar $airfoil.yMidFarU $domain.zMin)                                 // 22
+    ($domain.xMax $airfoil.yMidFarU $domain.zMin)                                     // 23
+    project ($airfoil.xThick $domain.yMax $domain.zMin) (cylinder)                    // 24
+    ($airfoil.xMidShiftFar $domain.yMax $domain.zMin)                                 // 25
+    ($airfoil.xTrailShiftFar $domain.yMax $domain.zMin)                               // 26
+    ($airfoil.xMidFar $domain.yMax $domain.zMin)                                      // 27
+    ($domain.xMax $domain.yMax $domain.zMin)                                          // 28
+ 
+    project ($airfoil.xThick $domain.yMin $domain.zMax) (cylinder)                    // 29
+    ($airfoil.xMidShiftFar $domain.yMin $domain.zMax)                                 // 30
+    ($airfoil.xTrailShiftFar $domain.yMin $domain.zMax)                               // 31
+    ($airfoil.xMidFar $domain.yMin $domain.zMax)                                      // 32
+    ($domain.xMax $domain.yMin $domain.zMax)                                          // 33
+    project ($airfoil.xThick $airfoil.yThickShiftD $domain.zMax) (scaled_airfoil)     // 34
+    ($airfoil.xMidShift $airfoil.yMidShiftD $domain.zMax)                             // 35
+    ($airfoil.xTrailShift $airfoil.yTrailShiftD $domain.zMax)                         // 36
+    ($airfoil.xMidFar $airfoil.yMidFarD $domain.zMax)                                 // 37
+    ($domain.xMax $airfoil.yMidFarD $domain.zMax)                                     // 38
+    project ($domain.xMin    $airfoil.yLead  $domain.zMax) (cylinder)                 // 39
+    project ($airfoil.xLeadShift $airfoil.yLead $domain.zMax) (scaled_airfoil)        // 40
+    project ($airfoil.xLead  $airfoil.yLead  $domain.zMax) (airfoil)                  // 41
+    project ($airfoil.xThick $airfoil.yLower $domain.zMax) (airfoil)                  // 42
+    project ($airfoil.xMidTrailShift $airfoil.yMidTrailShiftD $domain.zMax) (airfoil) // 43
+    project ($airfoil.xTrail $airfoil.yTrailLower $domain.zMax) (airfoil)             // 44
+    project ($airfoil.xThick $airfoil.yUpper $domain.zMax) (airfoil)                  // 45
+    project ($airfoil.xMidTrailShift $airfoil.yMidTrailShiftU $domain.zMax) (airfoil) // 46
+    project ($airfoil.xTrail $airfoil.yTrailUpper $domain.zMax) (airfoil)             // 47
+    project ($airfoil.xThick $airfoil.yThickShiftU $domain.zMax) (scaled_airfoil)     // 48
+    ($airfoil.xMidShift $airfoil.yMidShiftU $domain.zMax)                             // 49
+    ($airfoil.xTrailShift $airfoil.yTrailShiftU $domain.zMax)                         // 50
+    ($airfoil.xMidFar $airfoil.yMidFarU $domain.zMax)                                 // 51
+    ($domain.xMax $airfoil.yMidFarU $domain.zMax)                                     // 52
+    project ($airfoil.xThick $domain.yMax $domain.zMax) (cylinder)                    // 53
+    ($airfoil.xMidShiftFar $domain.yMax $domain.zMax)                                 // 54
+    ($airfoil.xTrailShiftFar $domain.yMax $domain.zMax)                               // 55
+    ($airfoil.xMidFar $domain.yMax $domain.zMax)                                      // 56
+    ($domain.xMax $domain.yMax $domain.zMax)                                          // 57
+
+);
+
+blocks
+(   
+    // 0
+    hex (40 34 29 39 11 5 0 10)
+    ($:domain.xUCells $:domain.yUCells 1)
+    // CELLS : x0:40-34, y0:34-29
+    edgeGrading ($:domain.xUGradMid $:domain.xUGradOutInv $:domain.xUGradOutInv $:domain.xUGradMid $:domain.yUGradMid $:domain.yUGradMid $:domain.yUGradMid $:domain.yUGradMid 1 1 1 1)
+    // FACES : 0:40-34, 1:39-29, 2:10-0, 3:11-5, 4:40-39, 5:34-29, 6:5-0, 7:11-10 
+
+    // 1
+    hex (35 30 29 34 6 1 0 5)
+
+    ($:domain.yUCells $:domain.yFar_1 1)
+    // CELLS : y0:34-29, y1:35-34
+    edgeGrading ($:domain.yUGradMid $:domain.yUGradMid $:domain.yUGradMid $:domain.yUGradMid $:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid 1 1 1 1)
+    // FACES : 0:35-30, 1:34-29, 2:5-0, 3:6-1, 4:35-34, 5:30-29, 6:1-0, 7:6-5
+
+    // 2
+    hex (36 31 30 35 7 2 1 6)
+    ($:domain.yUCells $:domain.yFar_2 1)
+    // CELLS : y0:34-29, y2:35-36
+    edgeGrading ($:domain.yUGradMid $:domain.yUGradMid $:domain.yUGradMid $:domain.yUGradMid $:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid 1 1 1 1)
+    // FACES : 0:36-31, 1:35-30, 2:6-1, 3:7-2, 4:36-35, 5:31-30, 6:2-1, 7:7-6
+
+    // 3
+    hex (37 32 31 36 8 3 2 7)
+    ($:domain.yUCells $:domain.yFar_3 1)
+    // CELLS : y0:34-29, y2:37-36
+    edgeGrading ($:domain.yDGradOut $:domain.yUGradMid $:domain.yUGradMid $:domain.yDGradOut $:domain.yDGradMidInv $:domain.NoGrad $:domain.NoGrad $:domain.yDGradMidInv 1 1 1 1)
+    // FACES : 0:37-32, 1:36-31, 2:7-2, 3:8-3, 4:37-36, 5:32-31, 6:3-2, 7:8-7
+
+    // 4
+    hex (38 33 32 37 9 4 3 8)
+    ($:domain.yUCells $:domain.yFar_4 1)
+    // CELLS : y0:34-29, y4:37-38
+    edgeGrading ($:domain.yDGradOut $:domain.yDGradOut $:domain.yDGradOut $:domain.yDGradOut $:domain.yDGradFarInv $:domain.yDGradFarInv $:domain.yDGradFarInv $:domain.yDGradFarInv 1 1 1 1)
+    // FACES : 0:38-33, 1:37-32, 2:8-3, 3:9-4, 4:38-37, 5:33-32, 6:4-3, 7:9-8
+
+    // 5
+    hex (41 42 34 40 12 13 5 11)
+    ($:domain.xUCells $:domain.yMid 1)
+    // CELLS : x0:40-34, y5:41-40
+    edgeGrading ($:domain.xUGradIn $:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradIn $:domain.yGradAirfoil $:domain.yGradAirfoil $:domain.yGradAirfoil $:domain.yGradAirfoil 1 1 1 1)
+    // FACES : 0:41-42, 1:40-34, 2:11-5, 3:12-13, 4:41-40, 5:42-34, 6:13-5, 7:12-11
+
+    // 6
+    hex (42 43 35 34 13 14 6 5)
+    ($:domain.yFar_1 $:domain.yMid 1)
+    // CELLS : y1:34-35, y5:41-40
+    edgeGrading ($:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid $:domain.yGradAirfoil $:domain.yGradAirfoil $:domain.yGradAirfoil $:domain.yGradAirfoil 1 1 1 1)
+    // FACES : 0:42-43, 1:34-35, 2:5-6, 3:13-14, 4:42-34, 5:43-35, 6:14-6, 7:13-5
+
+    // 7
+    hex (43 44 36 35 14 15 7 6)
+    ($:domain.yFar_2 $:domain.yMid 1)
+    // CELLS : y2:35-36, y5:41-40
+    edgeGrading ($:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid $:domain.yGradAirfoil $:domain.yGradAirfoil $:domain.yGradAirfoil $:domain.yGradAirfoil 1 1 1 1)
+    // FACES : 0:43-44, 1:35-36, 2:6-7, 3:14-15, 4:43-35, 5:44-36, 6:15-7, 7:14-6
+
+    // 8
+    hex (47 50 36 44 18 21 7 15)
+    ($:domain.yMid $:domain.yTrail 1)
+    // CELLS : y5:41-40, y8:47-44
+    edgeGrading ($:domain.yGradAirfoil $:domain.yGradAirfoil $:domain.yGradAirfoil $:domain.yGradAirfoil $:domain.NoGrad $:domain.NoGrad $:domain.NoGrad $:domain.NoGrad 1 1 1 1)
+    // FACES : 0:47-50, 1:44-36, 2:15-7, 3:18-21, 4:47-44, 5:50-36, 6:21-7, 7:18-15
+
+    // 9
+    hex (50 51 37 36 21 22 8 7)
+    ($:domain.yFar_3 $:domain.yTrail 1)
+    // CELLS : y3:37-36, y8:47-44
+    edgeGrading ($:domain.yDGradMid $:domain.yDGradMid $:domain.yDGradMid $:domain.yDGradMid $:domain.NoGrad $:domain.NoGrad $:domain.NoGrad $:domain.NoGrad 1 1 1 1)
+    // FACES : 0:50-51, 1:36-37, 2:7-8, 3:21-22, 4:50-36, 5:51-37, 6:22-8, 7:21-7
+
+    // 10
+    hex (51 52 38 37 22 23 9 8)
+    ($:domain.yFar_4 $:domain.yTrail 1)
+    // CELLS : y4:38-37, y8:47-44
+    edgeGrading ($:domain.yDGradFar $:domain.yDGradFar $:domain.yDGradFar $:domain.yDGradFar $:domain.NoGrad $:domain.NoGrad $:domain.NoGrad $:domain.NoGrad 1 1 1 1)
+    // FACES : 0:51-52, 1:37-38, 2:8-9, 3:22-23, 4:51-37, 5:52-38, 6:23-9, 7:22-8
+
+    // 11
+    hex (48 45 41 40 19 16 12 11)
+    ($:domain.yMid $:domain.yUCells 1)
+    // CELLS : y5:40-41, y0:40-34
+    edgeGrading ($:domain.yGradAirfoilInv $:domain.yGradAirfoilInv $:domain.yGradAirfoilInv $:domain.yGradAirfoilInv $:domain.xUGradMid $:domain.xUGradInInv $:domain.xUGradInInv $:domain.xUGradMid 1 1 1 1)
+    // FACES : 0:48-45, 1:40-41, 2:11-12, 3:19-16, 4:48-40, 5:45-41, 6:16-12, 7:19-11
+
+    // 12
+    hex (48 49 46 45 19 20 17 16)
+    ($:domain.yFar_1 $:domain.yMid 1)
+    // CELLS : y1:34-35, y5:41-40
+    edgeGrading ($:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid $:domain.yGradAirfoilInv $:domain.yGradAirfoilInv $:domain.yGradAirfoilInv $:domain.yGradAirfoilInv 1 1 1 1)
+    // FACES : 0:48-49, 1:45-46, 2:16-17, 3:19-20, 4:48-45, 5:49-46, 6:20-17, 7:19-16
+
+    // 13
+    hex (49 50 47 46 20 21 18 17)
+    ($:domain.yFar_2 $:domain.yMid 1)
+    // CELLS : y2:36-35, y5:41-40
+    edgeGrading ($:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid $:domain.yGradAirfoilInv $:domain.yGradAirfoilInv $:domain.yGradAirfoilInv $:domain.yGradAirfoilInv 1 1 1 1)
+    // FACES : 0:49-50, 1:46-47, 2:17-18, 3:20-21, 4:49-46, 5:50-47, 6:21-18, 7:20-17
+
+    // 14
+    hex (53 48 40 39 24 19 11 10)
+    ($:domain.yUCells $:domain.xUCells 1)
+    // CELLS : y0:34-29, x0:40-34
+    edgeGrading ($:domain.yUGradMidInv $:domain.yUGradMidInv $:domain.yUGradMidInv $:domain.yUGradMidInv $:domain.xUGradOut $:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradOut 1 1 1 1)
+    // FACES : 0:53-48, 1:39-40, 2:10-11, 3:24-19, 4:53-39, 5:48-40, 6:19-11, 7:24-10
+
+    // 15
+    hex (54 49 48 53 25 20 19 24)
+    ($:domain.yUCells $:domain.yFar_1 1)
+    // CELLS : y0:34-29, y1:35-34
+    edgeGrading ($:domain.yUGradMidInv $:domain.yUGradMidInv $:domain.yUGradMidInv $:domain.yUGradMidInv $:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid 1 1 1 1)
+    // FACES : 0:54-49, 1:53-48, 2:24-19, 3:25-20, 4:54-53, 5:49-48, 6:20-19, 7:25-24
+
+    // 16
+    hex (55 50 49 54 26 21 20 25)
+    ($:domain.yUCells $:domain.yFar_2 1)
+    // CELLS : y0:34-29, y2:36-35
+    edgeGrading ($:domain.yUGradMidInv $:domain.yUGradMidInv $:domain.yUGradMidInv $:domain.yUGradMidInv $:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid $:domain.xUGradMid 1 1 1 1)
+    // FACES : 0:55-50, 1:54-49, 2:25-20, 3:26-21, 4:55-54, 5:50-49, 6:21-20, 7:26-25
+
+    // 17
+    hex (56 51 50 55 27 22 21 26)
+    ($:domain.yUCells $:domain.yFar_3 1)
+    // CELLS : y0:34-29, y3:37-36
+    edgeGrading ($:domain.yDGradOutInv $:domain.yUGradMidInv $:domain.yUGradMidInv $:domain.yDGradOutInv $:domain.NoGrad $.domain.yDGradMidInv $:domain.yDGradMidInv $:domain.NoGrad 1 1 1 1)
+    // FACES : 0:56-51, 1:55-50, 2:26-21, 3:27-22, 4:56-55, 5:51-50, 6:22-21, 7:27-26
+
+    // 18
+    hex (57 52 51 56 28 23 22 27)
+    ($:domain.yUCells $:domain.yFar_4 1)
+    // CELLS : y0:34-29, y4:38-37
+    edgeGrading ($:domain.yDGradOutInv $:domain.yDGradOutInv $:domain.yDGradOutInv $:domain.yDGradOutInv $:domain.yDGradFarInv $:domain.yDGradFarInv $:domain.yDGradFarInv $:domain.yDGradFarInv 1 1 1 1)
+    // FACES : 0:57-52, 1:56-51, 2:27-22, 3:28-23, 4:57-56, 5:52-51, 6:23-22, 7:28-27
+);
+
+
+edges
+(
+    project 12 13 (airfoil)          // 5
+    project 13 14 (airfoil)          // 6
+    project 14 15 (airfoil)          // 7
+    project 12 16 (airfoil)          // 11
+    project 16 17 (airfoil)          // 12
+    project 17 18 (airfoil)          // 13
+
+    project 41 42 (airfoil)          // 5
+    project 42 43 (airfoil)          // 6
+    project 43 44 (airfoil)          // 7
+    project 41 45 (airfoil)          // 11
+    project 45 46 (airfoil)          // 12
+    project 46 47 (airfoil)          // 13
+ 
+    project 10 0  (cylinder)         // 0
+    project 10 24 (cylinder)         // 14
+    project 39 29 (cylinder)         // 0
+    project 39 53 (cylinder)         // 14
+
+    project 11 19 (scaled_airfoil)   //14
+    project 40 48 (scaled_airfoil)   //14
+    project 5  11 (scaled_airfoil)   //5
+    project 34 40 (scaled_airfoil)   //5
+ 
+);
+
+boundary
+(
+    airfoil
+    {
+        type wall;  
+        faces
+        (
+            (41 42 13 12)     // 5
+            (42 43 14 13)     // 6
+            (43 44 15 14)     // 7
+            (41 45 16 12)     // 11
+            (45 46 17 16)     // 12
+            (46 47 18 17)     // 13
+            (47 44 15 18)     // 8
+        );   
+    }
+
+    inlet
+    {
+        type patch;
+        inGroups (freestream);
+        faces
+        (
+            (10 0 29 39)      // 0
+            (29 30 1 0)       // 1
+            (30 31 2 1)       // 2
+            (31 32 3 2)       // 3
+            (32 33 4 3)       // 4
+            (10 24 53 39)     // 14
+            (53 54 25 24)     // 15
+            (54 55 26 25)     // 16
+            (55 56 27 26)     // 17
+            (56 57 28 27)     // 18
+        );
+    }
+
+    outlet
+    {
+        type patch;
+        inGroups (freestream);
+        faces
+        (
+            (33 38 9 4)       // 4
+            (38 52 23 9)      // 10
+            (52 57 28 23)     // 18
+        );
+    }
+
+    back
+    {
+        type empty;
+        faces
+        (
+            (11 5 0 10)    // 0
+            (5 6 1 0)      // 1
+            (6 7 2 1)      // 2
+            (7 8 3 2)      // 3
+            (8 9 4 3)      // 4
+            (12 13 5 11)   // 5
+            (13 14 6 5)    // 6
+            (14 15 7 6)    // 7
+            (18 21 7 15)   // 8
+            (21 22 8 7)    // 9
+            (22 23 9 8)    // 10
+            (19 16 12 11)  // 11
+            (19 20 17 16)  // 12
+            (20 21 18 17)  // 13
+            (24 19 11 10)  // 14
+            (24 25 20 19)  // 15
+            (25 26 21 20)  // 16
+            (26 27 22 21)  // 17
+            (27 28 23 22)  // 18
+        );
+    }
+
+    front
+    {
+        type empty;
+        faces
+        (
+            (40 34 29 39)  // 0
+            (34 35 30 29)  // 1
+            (35 36 31 30)  // 2
+            (36 37 32 31)  // 3
+            (37 38 33 32)  // 4
+            (41 42 34 40)  // 5
+            (42 43 35 34)  // 6
+            (43 44 36 35)  // 7
+            (47 50 36 44)  // 8
+            (50 51 37 36)  // 9
+            (51 52 38 37)  // 10
+            (48 45 41 40)  // 11
+            (48 49 46 45)  // 12
+            (49 50 47 46)  // 13
+            (53 48 40 39)  // 14
+            (53 54 49 48)  // 15
+            (54 55 50 49)  // 16
+            (55 56 51 50)  // 17
+            (56 57 52 51)  // 18
+
+        );
+    }
+
+);
+
+
+// ************************************************************************* //
