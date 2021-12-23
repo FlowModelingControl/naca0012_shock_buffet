@@ -1,5 +1,9 @@
 # OpenFOAM simulations of transonic shock buffets
 
+The simulation setups and analysis tools available in this repository were created as part of the research program [FOR 2895](https://www.for2895.uni-stuttgart.de/) *Unsteady flow interaction phenomena at high speed stall conditions* financed by the German Research Foundation (DFG). The primary intention of this repository is to provide a fully reproducible workflow for the simulation and analysis of transonic shock buffets.
+
+Note that the repository is still under construction. The workflow will be refined further and new data will be added in regular intervals.
+
 All simulations can be executed using Singularity or a local installation of OpenFOAM-v2012. Instructions and dependencies for each workflow follow below.
 
 ## Singularity (recommended)
@@ -52,3 +56,7 @@ cp -r test_cases/set1_alpha2_iddes_spalding_g5000 run/
 cd run/set1_alpha2_iddes_spalding_g5000
 ./Allrun.local
 ```
+
+## References
+
+To be added after AIAA SciTech 2022.
