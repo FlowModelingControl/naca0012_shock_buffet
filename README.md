@@ -59,4 +59,16 @@ cd run/set1_alpha2_iddes_spalding_g5000
 
 ## References
 
-To be added after AIAA SciTech 2022.
+```
+@inbook{doi:10.2514/6.2022-2591,
+author = {Andre Weiner and Richard Semaan},
+title = {Simulation and modal analysis of transonic shock buffets on a NACA-0012 airfoil},
+booktitle = {AIAA SCITECH 2022 Forum},
+chapter = {},
+pages = {},
+doi = {10.2514/6.2022-2591},
+URL = {https://arc.aiaa.org/doi/abs/10.2514/6.2022-2591},
+eprint = {https://arc.aiaa.org/doi/pdf/10.2514/6.2022-2591},
+    abstract = { View Video Presentation: https://doi.org/10.2514/6.2022-2591.vidWe perform 2D and 3D simulations of a NACA-0012 airfoil at pre- and post-buffet onset employing an IDDES simulation approach with Spalart-Allmaras closure model. The 3D simulations provide more realistic results in terms of buffet frequency and shock motion, highlighting the need for three-dimensional and scale-resolving simulations to properly capture the flow physics of the transonic buffet phenomenon. Dynamic mode decomposition identifies flow structures in the shock, boundary layer, and wake region that are slaved by the buffet cycle. We provide a fully reproducible, fully open-source simulation workflow to investigate transonic shock buffets. The workflow includes tools for visualization and modal analysis. }
+}
+```
