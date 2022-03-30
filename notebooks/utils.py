@@ -40,11 +40,11 @@ def fetch_force_coefficients(path):
     for tf in times:
         file_path = path + tf + "/coefficient.dat"
         df_list.append(pd.read_csv(file_path, sep="\t",
-                                   skiprows=range(13), header=None, names=names))
+                                   skiprows=range(13), header=None, names=names, low_memory=False))
     return np.split(pd.concat(df_list)[["t", "Cd", "Cl"]].values, 3, 1)
 
 
-def fetch_surface_data(path, remove_te=False):
+def fetch_surface_data(path, remove_te=False, symmetric=True):
     """Load and process surface sample data.
 
     The following processing is done:
@@ -56,6 +56,8 @@ def fetch_surface_data(path, remove_te=False):
     ----------
     path - str: path to csv file
     remove_te - bool: trailing edge data are removed if True
+    symmetric - bool: rough approximation of chamber line based
+        on three points if False to separate lower and upper surface
 
     Returns
     -------
@@ -67,17 +69,25 @@ def fetch_surface_data(path, remove_te=False):
     data = pd.read_csv(path, sep=" ", skiprows=[
                        0, 1], header=None, names=["x", "y", "z", "f"])
     x_max = data.x.max()
+    if symmetric:
+        chamber = 0.0
+    else:
+        y85 = data.y[(data.x > 0.83*x_max) & (data.x < 0.87*x_max)].mean()
+        chamber = np.zeros(len(data))
+        x85 = 0.85 * x_max
+        chamber = data.x.values * y85 / x85
+        chamber[data.x > x85] = y85 * (1.0 - (data.x[data.x > x85].values - x85) / (x_max - x85))
     limit = 0.999 if remove_te else 1.1
-    x_up = data[(data.y >= 0) & (data.x < limit*x_max)].x
+    x_up = data[(data.y >= chamber) & (data.x < limit*x_max)].x
     x_up = x_up.values / x_max
-    z_up = data[(data.y >= 0) & (data.x < limit*x_max)].z
+    z_up = data[(data.y >= chamber) & (data.x < limit*x_max)].z
     z_up = z_up.values / x_max
-    f_up = data[(data.y >= 0) & (data.x < limit*x_max)].f.values
-    x_low = data[(data.y < 0) & (data.x < limit*x_max)].x
+    f_up = data[(data.y >= chamber) & (data.x < limit*x_max)].f.values
+    x_low = data[(data.y < chamber) & (data.x < limit*x_max)].x
     x_low = x_low.values / x_max
-    z_low = data[(data.y < 0) & (data.x < limit*x_max)].z
+    z_low = data[(data.y < chamber) & (data.x < limit*x_max)].z
     z_low = z_low.values / x_max
-    f_low = data[(data.y < 0) & (data.x < limit*x_max)].f.values
+    f_low = data[(data.y < chamber) & (data.x < limit*x_max)].f.values
     ind_up = np.argsort(x_up)
     ind_low = np.argsort(x_low)
     return x_up[ind_up], z_up[ind_up], f_up[ind_up], x_low[ind_low], z_low[ind_low], f_low[ind_low]
@@ -206,7 +216,7 @@ def find_write_times(path):
     return times
 
 
-def average_surface_data(path, file_name, t_start=0.0, t_end=1000.0, remove_te=False):
+def average_surface_data(path, file_name, t_start=0.0, t_end=1000.0, remove_te=False, symmetric=True):
     """Average surface field in time and spanwise direction.
 
     The functions does the following processing steps:
@@ -225,6 +235,8 @@ def average_surface_data(path, file_name, t_start=0.0, t_end=1000.0, remove_te=F
         the same for all time folders
     t_* float: start and end time for averaging window
     remove_te - bool: trailing edge data are removed if True
+    symmetric - bool: rough approximation of chamber line based
+        on three points if False to separate lower and upper surface
 
     Returns
     -------
@@ -242,14 +254,14 @@ def average_surface_data(path, file_name, t_start=0.0, t_end=1000.0, remove_te=F
     print("Computing statistics for t={:s}...{:s}s ({:d} snapshots)".format(
         times[i_start], times[i_end], len(times[i_start:i_end])))
     x_up, _, f_up, x_low, _, f_low = fetch_surface_data(
-        path + times[i_start] + "/" + file_name)
+        path + times[i_start] + "/" + file_name, remove_te, symmetric)
     n_z = spanwise_points(x_up)
     F_up = np.zeros((int(f_up.shape[0] / n_z), len(times[i_start:i_end])))
     F_low = np.zeros((int(f_low.shape[0] / n_z), len(times[i_start:i_end])))
     F_up[:, 0] = np.copy(spanwise_average(f_up, n_z))
     F_low[:, 0] = np.copy(spanwise_average(f_low, n_z))
     for i, t in enumerate(times[i_start+1:i_end]):
-        _, _, f_up, _, _, f_low = fetch_surface_data(path + t + "/" + file_name, remove_te)
+        _, _, f_up, _, _, f_low = fetch_surface_data(path + t + "/" + file_name, remove_te, symmetric)
         F_up[:, i+1] = np.copy(spanwise_average(f_up, n_z))
         F_low[:, i+1] = np.copy(spanwise_average(f_low, n_z))
     return (spanwise_average(x_up, n_z), spanwise_average(x_low, n_z),
