@@ -1,14 +1,15 @@
 """Create data matrices based on NACA0012 surface pressure coefficients.
 """
 
-from pathlib import Path
+from os import makedirs
 import torch as pt
 from flowtorch.data import CSVDataloader, mask_box
+from flow_conditions import CHORD
 
 
 # create output folder
-outpath = "./output/naca0012_data/"
-Path(outpath).mkdir(parents=True, exist_ok=True)
+outpath = "./output/naca0012_data/surface/"
+makedirs(outpath, exist_ok=True)
 
 # paths to raw data
 raw_data = "/media/andre/Elements/naca0012_shock_buffet/run/"
@@ -22,12 +23,12 @@ def convert_and_save_data(loader: CSVDataloader, path: str, extension: str=".pt"
     times = loader.write_times
     dm = loader.load_snapshot("f", times)
     pt.save(pt.tensor([float(t) for t in times]), path + "times" + extension)
-    pt.save(loader.vertices, path + "vertices" + extension)
-    pt.save(dm, path + "data_matrix" + extension)
+    pt.save(loader.vertices/CHORD, path + "vertices" + extension)
+    pt.save(dm, path + "dm" + extension)
 
 loader = CSVDataloader.from_foam_surface(raw_data_z25, "total(p)_coeff_airfoil.raw")
-convert_and_save_data(loader, outpath, "_z25.pt")
+convert_and_save_data(loader, outpath, "_ref0_z25.pt")
 loader = CSVDataloader.from_foam_surface(raw_data_r1_z25, "total(p)_coeff_airfoil.raw")
-convert_and_save_data(loader, outpath, "_r1_z25.pt")
+convert_and_save_data(loader, outpath, "_ref1_z25.pt")
 loader = CSVDataloader.from_foam_surface(raw_data_z50, "total(p)_coeff_airfoil.raw")
-convert_and_save_data(loader, outpath, "_z50.pt")
+convert_and_save_data(loader, outpath, "_ref0_z50.pt")

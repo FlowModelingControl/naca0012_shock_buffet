@@ -4,10 +4,130 @@
 
 import pandas as pd
 import numpy as np
+import torch as pt
 from glob import glob
 from sklearn.neighbors import KNeighborsRegressor
+from scipy.signal import butter, lfilter, freqz
+from stl import mesh
+from flow_conditions import *
+
 
 TOL = 1.0e-6
+
+
+def filter_time_series(signal, fs, f_low):
+    """Apply a low pass filter to a batch of temporal signals.
+
+    For more details, refer to stackoverflow:
+    https://stackoverflow.com/questions/25191620/creating-lowpass-filter-in-scipy-understanding-methods-and-units
+
+    Parameters
+    ----------
+    signal - array-like: 2D array with the batch being the first
+        and the temporal signal being the second dimension.
+    fs - float: sampling frequency
+    f_low - float: frequencies below are removed
+
+    Returns
+    -------
+    filtered - array-like: batch of filtered signals
+
+    """
+    def butter_lowpass(cutoff, fs, order=6):
+        return butter(order, cutoff, fs=fs, btype='high', analog=False)
+
+    def butter_lowpass_filter(data, cutoff, fs, order=6):
+        b, a = butter_lowpass(cutoff, fs, order=order)
+        y = lfilter(b, a, data)
+        return y
+
+    filtered = pt.zeros_like(signal)
+    for i in range(signal.shape[0]):
+        filtered[i, :] = pt.from_numpy(butter_lowpass_filter(signal[i,:].numpy(), f_low, fs, 6))
+    return filtered
+
+
+def spatio_temporal_correlation(signal, n_tau):
+    """Compute spatio-temporal correlation coefficients.
+
+    signal - array-like: 2D array with space being the first
+        and time being the second dimension.
+    n_tau - int: maximum time shift in number of time steps
+    
+    """
+    R = pt.zeros((signal.shape[0], 2*n_tau + 1))
+    p_i_center = int(signal.shape[0]*0.5)
+    t_i_center = int(signal.shape[1]*0.5)
+    p_n_mean = signal[p_i_center, n_tau:-n_tau].square().mean()
+    for p_i in range(signal.shape[0]):
+        p_m_mean = signal[p_i, n_tau:-n_tau].square().mean()
+        for t_i, tau_i in enumerate(range(-n_tau, n_tau+1)):
+            R[p_i, t_i] = (signal[p_i_center, n_tau:-n_tau] * signal[p_i, n_tau+tau_i:signal.shape[1]-n_tau+tau_i]).mean()
+            R[p_i, t_i] /= pt.sqrt(p_n_mean * p_m_mean)
+    return R
+
+
+def lhs_sampling_1d(r_min, r_max, n_samples, seed=0):
+    """1D latin hypercube sampling for integers.
+
+    Parameters
+    ----------
+    r_min - int: lower bound of integers to consider (included)
+    r_max - int: upper bound of integers to consider (included)
+    n_samples - int: number of samples to draw
+    seed - int: seed for random number generator
+
+    Returns
+    -------
+    r - array-like: tensor of LHS samples
+
+    """
+    pt.manual_seed(seed)
+    ranks = pt.arange(r_min, r_max+1, 1, dtype=pt.int64)
+    n_split = [int(ranks.nelement() / n_samples)] * n_samples
+    mod = ranks.nelement() % n_samples
+    if not mod == 0:
+        for i in range(mod):
+            n_split[i] +=1
+    select = []
+    for rr in pt.split(ranks, n_split):
+        select.append(rr[pt.multinomial(pt.ones_like(rr, dtype=pt.float32), 1)])
+    return pt.tensor(select)
+
+
+def normalize_frequency(f):
+    """Compute dimensionless frequency.
+
+    Parameters
+    ----------
+
+    f - array-like: frequency
+
+    Returns
+    -------
+    f - array-like: normalized frequency
+
+    """
+    return 2.0 * np.pi * CHORD * f / U_INF
+
+
+def add_stl_patch(axis, scale=1.0, geometry="../geometry/naca0012.stl"):
+    """Add patch depicting STL geometry to patch.
+
+    Parameters
+    ----------
+    axis - Axes: matplotlib Axes object to which to add the patch
+    scale - float: scaling factor to adjust the patche's size
+    geometry - str: path to the geometry file
+
+    """
+    stl = mesh.Mesh.from_file(geometry)
+    x_up = stl.x[stl.y > 0] * scale
+    y_up = stl.y[stl.y > 0] * scale
+    x_low = stl.x[stl.y < 0] * scale
+    y_low = stl.y[stl.y < 0] * scale
+    axis.fill_between(x_up, 0.0, y_up, color="k")
+    axis.fill_between(x_low, y_low, 0.0, color="k")
 
 
 def fetch_force_coefficients(path):
