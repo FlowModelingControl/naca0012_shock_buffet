@@ -34,7 +34,7 @@ Identifying vortex shedding, acoustic waves, and shock motion requires a robust 
 Due to the size of the full simulations, we provide only processed data and final outputs. If additional data are required, feel free to get in touch, e.g., by opening a new issue. The notebooks expect the data to be located under *notebooks/output/*. To download and place the data correctly, run:
 ```
 # assuming you are at the repository's top level
-wget LINK_TO_ARCHIVE
+wget https://cloud.tu-braunschweig.de/s/cEqdXiDb9eRczsX/download/results.tar.gz
 tar xzf results.tar.gz
 ```
 
