@@ -19,11 +19,11 @@ The video below shows a slice of the local Mach number field. The flow condition
 
 The simulation setup successfully yields the transonic buffet phenomenon.
 
-
+https://user-images.githubusercontent.com/8482575/187466191-15d3a8ce-62af-4b9e-a46d-13a4eb49eb03.mp4
 
 The buffet phenomenon is characterized by the complex interaction of shock motion, boundary layer separation, and upstream-propagating acoustic waves. The video below shows the reconstruction of a single DMD mode, which encodes vortex shedding and acoustic waves propagating upstream. The acoustic waves originate in the shear layer and at the trailing edge.
 
-
+https://user-images.githubusercontent.com/8482575/187465648-08c509c9-889a-4a1e-a68c-1d1790e2b924.mp4
 
 Identifying vortex shedding, acoustic waves, and shock motion requires a robust DMD workflow, which is established by extensive testing of various DMD variants and state vectors. For more details refer to the articles listed under *References*.
 
