@@ -95,20 +95,22 @@ def lhs_sampling_1d(r_min, r_max, n_samples, seed=0):
     return pt.tensor(select)
 
 
-def normalize_frequency(f):
+def normalize_frequency(f, chord=CHORD, u_inf=U_INF):
     """Compute dimensionless frequency.
 
     Parameters
     ----------
 
     f - array-like: frequency
+    chord - float: chord length
+    u_inf - float: freestream velocity
 
     Returns
     -------
     f - array-like: normalized frequency
 
     """
-    return 2.0 * np.pi * CHORD * f / U_INF
+    return 2.0 * np.pi * chord * f / u_inf
 
 
 def add_stl_patch(axis, scale=1.0, geometry="../geometry/naca0012.stl"):
@@ -128,6 +130,20 @@ def add_stl_patch(axis, scale=1.0, geometry="../geometry/naca0012.stl"):
     y_low = stl.y[stl.y < 0] * scale
     axis.fill_between(x_up, 0.0, y_up, color="k")
     axis.fill_between(x_low, y_low, 0.0, color="k")
+    
+    
+def add_oat_patch(axis, scale=1.0, geometry="../geometry/oat15.stl"):
+    """Add patch depicting OAT15 geometry to patch.
+
+    Parameters
+    ----------
+    axis - Axes: matplotlib Axes object to which to add the patch
+    scale - float: scaling factor to adjust the patche's size
+    geometry - str: path to the geometry file
+
+    """
+    stl = mesh.Mesh.from_file(geometry)
+    axis.fill(stl.x, stl.y, color="k")
 
 
 def fetch_force_coefficients(path):

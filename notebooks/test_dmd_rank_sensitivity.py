@@ -2,8 +2,9 @@
 """
 
 from os import makedirs
+from os.path import join
+from collections import defaultdict
 import torch as pt
-import pickle
 from flowtorch.analysis import DMD
 from utils import lhs_sampling_1d
 
@@ -26,21 +27,29 @@ ranks = lhs_sampling_1d(5, 500, 100)
 pt.save(ranks, f"{output}ranks_ref1_z25.pt")
 
 # helper function to collect and save relevant data
-def test_dmd_variant(dm, dt, options, key):
-    eigs, freq, sort_int, sort_amp, err, top_k_err, top_k_err_int = [], [], [], [], [], [], []
+def test_dmd_variant(dm, dt, options, key, n_points, weights):
+    results = defaultdict(list)
     for r in ranks:
         print(f"\rTesting rank r={r}", end="")
-        dmd = DMD(dm, dt, rank=r, **options)
-        eigs.append(dmd.eigvals)
-        freq.append(dmd.frequency)
-        sort_int.append(dmd.top_modes(100, integral=True))
-        sort_amp.append(dmd.top_modes(100, integral=False))
-        err.append(dmd.reconstruction_error.norm().item())
-        top_k_err.append((dmd.partial_reconstruction(dmd.top_modes(21, integral=False)) - dm).norm().item())
-        top_k_err_int.append((dmd.partial_reconstruction(dmd.top_modes(21, integral=True)) - dm).norm().item())
-    to_save = [eigs, freq, sort_int, sort_amp, err, top_k_err, top_k_err_int]
-    with open(f"{output}{key}.pkl", "wb") as out:
-        pickle.dump(to_save, out, pickle.HIGHEST_PROTOCOL)
+        dmd = DMD(dm*weights, dt, rank=r, **options)
+        results["eigvals"].append(dmd.eigvals)
+        results["frequency"].append(dmd.frequency)
+        results["importance"].append(dmd.integral_contribution)
+        results["top_100_int"].append(dmd.top_modes(100, integral=True))
+        results["top_100_amp"].append(dmd.top_modes(100, integral=False))
+        rec_err = dmd.reconstruction / weights - dm
+        n_fields = int(dm.shape[0] / n_points)
+        for fi in range(n_fields):
+            mean_norm = dm[fi*n_points:(fi+1)*n_points, :].mean(dim=1).norm()
+            err_fi = rec_err[fi*n_points:(fi+1)*n_points, :].norm()
+            results[f"rec_err_{fi}"].append(err_fi.item())
+            results[f"rec_err_norm_{fi}"].append((err_fi/mean_norm).item())
+        results["rec_err"].append(dmd.reconstruction_error.norm().item())
+        YH = (dmd.modes @ pt.diag(dmd.eigvals)) @ \
+            (pt.linalg.pinv(dmd.modes) @ dmd._dm[:, :-1].type(dmd.modes.dtype))
+        p_err = (dmd._dm[:, 1:] - YH.real.type(dmd._dm.dtype)).norm().item()
+        results["pro_err"].append(p_err)
+    pt.save(results, join(output, f"{key}.pt",))
     print("")
     
 # surface pressure
@@ -54,7 +63,7 @@ dm_cp = dm_cp[:, start_idx:end_idx+1:2]
 dt_cp = (times_cp[1] - times_cp[0]) * 2
 
 for key in dmd_options.keys():
-    print(f"Testing {key} on surface pressure")
+    print(f"Testing {key} on surface pressure, unweighted")
     test_dmd_variant(dm_cp, dt_cp, dmd_options[key], f"{key}_cp")
     print("")
 del dm_cp
@@ -65,35 +74,67 @@ dt = (times[1] - times[0]) * 2
 w = pt.load(f"{data}slice/w_ref1_z25.pt").sqrt().unsqueeze(-1)
 n_points = w.shape[0]
 
-##  density, slice, weighted, every second snapshot
-dm_rho = pt.load(f"{data}slice/dm_ref1_z25.pt")[3*n_points:4*n_points, ::2] * w
+##  density, slice, unweighted
+dm = pt.load(f"{data}slice/dm_ref1_z25.pt")[3*n_points:4*n_points, ::2]
 for key in dmd_options.keys():
-    print(f"Testing {key} on slice density")
-    test_dmd_variant(dm_rho, dt, dmd_options[key], f"{key}_rho")
+    print(f"Testing {key} on density, unweighted")
+    test_dmd_variant(dm, dt, dmd_options[key], f"{key}_rho")
     print("")
-del dm_rho
 
-##  x-y-velocity, slice, weighted, every second snapshot
-dm_uxy = pt.load(f"{data}slice/dm_ref1_z25.pt")[:2*n_points, ::2] * w.repeat((2, 1))
+##  density, slice, weighted
+dm *= w
 for key in dmd_options.keys():
-    print(f"Testing {key} on slice velocity")
-    test_dmd_variant(dm_uxy, dt, dmd_options[key], f"{key}_uxy")
+    print(f"Testing {key} on density, weighted")
+    test_dmd_variant(dm, dt, dmd_options[key], f"{key}_rho_weighted")
     print("")
-del dm_uxy
 
-##  x-y-velocity, slice, weighted, every second snapshot
-dm_uxya = pt.zeros((3*n_points, times[::2].shape[0]))
+##  x-y-velocity, slice, unweighted
+dm = pt.load(f"{data}slice/dm_ref1_z25.pt")[:2*n_points, ::2]
+for key in dmd_options.keys():
+    print(f"Testing {key} on slice x-y velocity, unweighted")
+    test_dmd_variant(dm, dt, dmd_options[key], f"{key}_vel_xy")
+    print("")
+
+##  x-y-velocity, slice, unweighted
+dm *= w.repeat((2, 1))
+for key in dmd_options.keys():
+    print(f"Testing {key} on slice x-y velocity, weighted")
+    test_dmd_variant(dm, dt, dmd_options[key], f"{key}_vel_xy_weighted")
+    print("")
+
+##  x-y-z-velocity, slice, unweighted
+dm = pt.load(f"{data}slice/dm_ref1_z25.pt")[:3*n_points, ::2]
+for key in dmd_options.keys():
+    print(f"Testing {key} on slice x-y-z velocity, unweighted")
+    test_dmd_variant(dm, dt, dmd_options[key], f"{key}_vel_xyz")
+    print("")
+
+##  x-y-z-velocity, slice, weighted
+dm *= w.repeat((3, 1))
+for key in dmd_options.keys():
+    print(f"Testing {key} on slice x-y-z velocity, weighted")
+    test_dmd_variant(dm, dt, dmd_options[key], f"{key}_vel_xyz_weighted")
+    print("")
+
+##  x-y-velocity + local speed of sound, slice, unweighted
+dm = pt.zeros((3*n_points, times[::2].shape[0]))
 dm_full = pt.load(f"{data}slice/dm_ref1_z25.pt")[:, ::2]
-dm_uxya[:2*n_points, :] = dm_full[:2*n_points, :] * w.repeat((2, 1))
+dm[:2*n_points, :] = dm_full[:2*n_points, :]
 kappa = pt.tensor(1.4)
 scale = pt.sqrt(2.0 / (kappa * (kappa - 1.0)))
 U = (dm_full[:n_points, :]**2 + dm_full[n_points:2*n_points, :]**2 + dm_full[2*n_points:3*n_points, :]**2).sqrt()
 Ma = dm_full[4*n_points:, :]
-dm_uxya[2*n_points:, :] = scale * (U / Ma) * w
+dm[2*n_points:, :] = scale * (U / Ma)
 del dm_full, U, Ma
 
 for key in dmd_options.keys():
-    print(f"Testing {key} on slice velocity/speed of sound")
-    test_dmd_variant(dm_uxya, dt, dmd_options[key], f"{key}_uxya")
+    print(f"Testing {key} on velocity/speed of sound, unweighted")
+    test_dmd_variant(dm, dt, dmd_options[key], f"{key}_vel_axy")
     print("")
-del dm_uxya
+
+##  x-y-velocity + local speed of sound, slice, weighted
+dm *= w.repeat((3, 1))
+for key in dmd_options.keys():
+    print(f"Testing {key} on velocity/speed of sound, weighted")
+    test_dmd_variant(dm, dt, dmd_options[key], f"{key}_vel_axy_weighted")
+    print("")
